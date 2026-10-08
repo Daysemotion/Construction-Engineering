@@ -1,0 +1,21 @@
+{
+  "name": "construction-engineering",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "description": "A documentation-first workflow for accountable AI software teams, with an optional TypeScript record checker.",
+  "repository": { "type": "git", "url": "git+https://github.com/Daysemotion/Construction-Engineering.git" },
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test && node scripts/check-docs.ts",
+    "orch": "node src/cli.ts",
+    "install:skill": "node scripts/install-skill.ts",
+    "schema": "node scripts/generate-schema.ts",
+    "examples": "node scripts/generate-examples.ts"
+  },
+  "dependencies": { "zod": "^4.0.0" },
+  "devDependencies": { "@types/node": "^24.0.0", "typescript": "^5.9.0" }
+}

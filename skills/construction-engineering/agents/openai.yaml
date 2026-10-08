@@ -1,0 +1,6 @@
+interface:
+  display_name: "Construction Engineering"
+  short_description: "Plan and deliver software with accountable agent teams"
+  default_prompt: "Use $construction-engineering to plan and complete this software task with proportionate coordination and verification."
+policy:
+  allow_implicit_invocation: true

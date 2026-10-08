@@ -1,0 +1,264 @@
+{
+  "plan": {
+    "schemaVersion": 1,
+    "id": "auth-refactor",
+    "revision": 1,
+    "objective": "Preserve authentication behavior while moving consumers to a shared contract",
+    "exclusions": [
+      "Production deployment",
+      "Changing login behavior"
+    ],
+    "mode": "standard",
+    "limits": {
+      "maxConcurrent": 3,
+      "maxAttempts": 3,
+      "maxDepth": 5,
+      "maxTasks": 100,
+      "budgetUnits": 100
+    },
+    "unitDescription": "Synthetic planning credits; not money, tokens, or measured runtime",
+    "actors": [
+      {
+        "id": "owner",
+        "role": "owner",
+        "responsibility": "Scope and authorization"
+      },
+      {
+        "id": "general",
+        "role": "general",
+        "parent": "owner",
+        "responsibility": "Integration and conflict decisions"
+      },
+      {
+        "id": "api",
+        "role": "subcontractor",
+        "parent": "general",
+        "responsibility": "Auth contract and backend"
+      },
+      {
+        "id": "web",
+        "role": "subcontractor",
+        "parent": "general",
+        "responsibility": "Web consumer migration"
+      },
+      {
+        "id": "api-worker",
+        "role": "worker",
+        "parent": "api",
+        "responsibility": "Contract implementation"
+      },
+      {
+        "id": "web-worker",
+        "role": "worker",
+        "parent": "web",
+        "responsibility": "Consumer implementation"
+      },
+      {
+        "id": "inspector",
+        "role": "inspector",
+        "parent": "owner",
+        "responsibility": "Independent verification"
+      }
+    ],
+    "proposals": [
+      {
+        "contractor": "api",
+        "taskIds": [
+          "contract",
+          "integration"
+        ],
+        "requestedWorkers": 1,
+        "rationale": "Contract is sequential; reuse worker for integration",
+        "design": "Add compatible contract, verify behavior before migration",
+        "interfaceRefs": [
+          "contract/auth-v1"
+        ],
+        "risks": [
+          "Unknown external consumers"
+        ]
+      },
+      {
+        "contractor": "web",
+        "taskIds": [
+          "web-migration"
+        ],
+        "requestedWorkers": 1,
+        "rationale": "One coherent consumer boundary",
+        "design": "Migrate behind adapter",
+        "interfaceRefs": [
+          "contract/auth-v1"
+        ],
+        "risks": [
+          "Stale contract versions"
+        ]
+      }
+    ],
+    "integrationDecision": "Approve staffing proposal of two workers; keep one session for coordination; independent inspection uses an available slot",
+    "tasks": [
+      {
+        "id": "contract",
+        "title": "Characterize and extract authentication contract",
+        "owner": "api-worker",
+        "dependsOn": [],
+        "resources": [
+          "auth/schema"
+        ],
+        "acceptance": [
+          "Existing success and error behavior preserved"
+        ],
+        "units": 10,
+        "priority": 100
+      },
+      {
+        "id": "web-migration",
+        "title": "Migrate web consumer",
+        "owner": "web-worker",
+        "dependsOn": [
+          "contract"
+        ],
+        "resources": [
+          "web/auth"
+        ],
+        "acceptance": [
+          "Consumer contract tests pass"
+        ],
+        "units": 10,
+        "priority": 50
+      },
+      {
+        "id": "integration",
+        "title": "Verify combined artifact",
+        "owner": "api-worker",
+        "dependsOn": [
+          "contract",
+          "web-migration"
+        ],
+        "resources": [
+          "integration/auth"
+        ],
+        "acceptance": [
+          "Combined exact revision passes required end-to-end checks"
+        ],
+        "units": 10,
+        "priority": 10
+      }
+    ]
+  },
+  "approvals": [
+    {
+      "planHash": "339e0c93a82d07b771e9011c3229313721181ef66962a69963a4b1ced9c80e8d",
+      "actor": "owner",
+      "decision": "approve",
+      "at": "2026-01-01T00:00:00Z",
+      "sourceRef": "SIMULATION ONLY: fictional owner approval"
+    }
+  ],
+  "runs": [
+    {
+      "task": "contract",
+      "actor": "api-worker",
+      "attempt": 1,
+      "state": "submitted",
+      "startedAt": "2026-01-01T00:01:00.000Z",
+      "endedAt": "2026-01-01T00:01:10.000Z",
+      "unitsUsed": 5,
+      "artifact": "simulation:contract:v1",
+      "dependencyArtifacts": {}
+    },
+    {
+      "task": "web-migration",
+      "actor": "web-worker",
+      "attempt": 1,
+      "state": "submitted",
+      "startedAt": "2026-01-01T00:02:00.000Z",
+      "endedAt": "2026-01-01T00:02:10.000Z",
+      "unitsUsed": 5,
+      "artifact": "simulation:web-migration:v1",
+      "dependencyArtifacts": {
+        "contract": "simulation:contract:v1"
+      }
+    },
+    {
+      "task": "integration",
+      "actor": "api-worker",
+      "attempt": 1,
+      "state": "submitted",
+      "startedAt": "2026-01-01T00:03:00.000Z",
+      "endedAt": "2026-01-01T00:03:10.000Z",
+      "unitsUsed": 5,
+      "artifact": "simulation:integration:v1",
+      "dependencyArtifacts": {
+        "contract": "simulation:contract:v1",
+        "web-migration": "simulation:web-migration:v1"
+      }
+    },
+    {
+      "task": "contract",
+      "actor": "api-worker",
+      "attempt": 2,
+      "state": "submitted",
+      "startedAt": "2026-01-01T00:04:00.000Z",
+      "endedAt": "2026-01-01T00:04:10.000Z",
+      "unitsUsed": 5,
+      "artifact": "simulation:contract:v2",
+      "dependencyArtifacts": {}
+    }
+  ],
+  "inspections": [
+    {
+      "task": "contract",
+      "attempt": 1,
+      "artifact": "simulation:contract:v1",
+      "reviewer": "inspector",
+      "kind": "independent",
+      "verdict": "pass",
+      "at": "2026-01-01T00:01:20.000Z",
+      "evidence": [
+        "SIMULATED evidence; no product tests run"
+      ],
+      "findings": []
+    },
+    {
+      "task": "web-migration",
+      "attempt": 1,
+      "artifact": "simulation:web-migration:v1",
+      "reviewer": "inspector",
+      "kind": "independent",
+      "verdict": "pass",
+      "at": "2026-01-01T00:02:20.000Z",
+      "evidence": [
+        "SIMULATED evidence; no product tests run"
+      ],
+      "findings": []
+    },
+    {
+      "task": "integration",
+      "attempt": 1,
+      "artifact": "simulation:integration:v1",
+      "reviewer": "inspector",
+      "kind": "independent",
+      "verdict": "pass",
+      "at": "2026-01-01T00:03:20.000Z",
+      "evidence": [
+        "SIMULATED evidence; no product tests run"
+      ],
+      "findings": []
+    },
+    {
+      "task": "contract",
+      "attempt": 2,
+      "artifact": "simulation:contract:v2",
+      "reviewer": "inspector",
+      "kind": "independent",
+      "verdict": "pass",
+      "at": "2026-01-01T00:04:20.000Z",
+      "evidence": [
+        "SIMULATED evidence; no product tests run"
+      ],
+      "findings": []
+    }
+  ],
+  "coordinationSessions": [
+    "general"
+  ]
+}
